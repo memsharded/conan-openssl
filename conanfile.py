@@ -29,6 +29,7 @@ class OpenSSLConan(ConanFile):
     version = "1.0.2i"
     settings = "os", "compiler", "arch", "build_type"
     url="http://github.com/lasote/conan-openssl"
+    license ="OpenSSL dual: https://www.openssl.org/source/license.html"
     # https://github.com/openssl/openssl/blob/OpenSSL_1_0_2c/INSTALL
     options = {"no_threads": [True, False],
                "no_electric_fence": [True, False],
@@ -203,8 +204,9 @@ class OpenSSLConan(ConanFile):
             self.output.warn(os.curdir)
             make_command = "nmake -f ms\\ntdll.mak" if self.options.shared else "nmake -f ms\\nt.mak "
             self.output.warn("----------MAKE OPENSSL %s-------------" % self.version)
-            run_in_src(make_command)
-            run_in_src("%s install" % make_command)
+            vcvars = tools.vcvars_command(self.settings)
+            run_in_src("%s && %s" % (vcvars, make_command))
+            run_in_src("%s && %s install" % (vcvars, make_command))
             # Rename libs with the arch
             renames = {"./binaries/lib/libeay32.lib": "./binaries/lib/libeay32%s.lib" % runtime,
                        "./binaries/lib/ssleay32.lib": "./binaries/lib/ssleay32%s.lib" % runtime}
